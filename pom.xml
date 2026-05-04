@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.2</version>
+        <relativePath/> 
+    </parent>
+    
+    <groupId>de.ostfalia</groupId>
+    <artifactId>serp24</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>serp24</name>
+    <packaging>pom</packaging> <modules>
+        <module>services/project-service</module>
+        <module>services/consultant-service</module>
+        <module>services/entry-service</module>
+        </modules>
+
+    <properties>
+        <java.version>17</java.version>
+        <springdoc.version>2.5.0</springdoc.version>
+        <openapi-nullable.version>0.2.1</openapi-nullable.version>
+        <modelmapper.version>2.3.8</modelmapper.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openapitools</groupId>
+                <artifactId>jackson-databind-nullable</artifactId>
+                <version>${openapi-nullable.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modelmapper</groupId>
+                <artifactId>modelmapper</artifactId>
+                <version>${modelmapper.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip> </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

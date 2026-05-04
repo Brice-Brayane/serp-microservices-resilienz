@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # 1. CUSTOMER SERVICE & DB
+  # ==========================================
+  customer-db:
+    image: postgres:15    # Télécharge l'image officielle de PostgreSQL version 15.
+    container_name: customer-db-container
+    environment:
+      POSTGRES_DB: customer_db
+      POSTGRES_USER: customer_user
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U customer_user -d customer_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  customer-service:
+    build: ./services/customer-service  # chercher le fichier Dockerfile dans ce dossier pour construire l'image de ton application.
+    container_name: customer-service-app
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_HOST=customer-db
+      - DB_USER=customer_user
+      - DB_PASSWORD=postgres
+    depends_on:
+      customer-db:
+        condition: service_healthy   # Utilise le healthcheck pour éviter les erreurs de connexion
+
+
+  # ==========================================
+  # 2. CONSULTANT SERVICE & DB
+  # ==========================================
+  consultant-db:
+    image: postgres:15
+    container_name: consultant-db-container
+    environment:
+      POSTGRES_DB: consultant_db
+      POSTGRES_USER: consultant_user
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432" # Port différent pour la machine hôte
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U consultant_user -d consultant_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  consultant-service:
+    build: ./services/consultant-service
+    container_name: consultant-service-app
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_HOST=consultant-db
+      - DB_USER=consultant_user
+      - DB_PASSWORD=postgres
+    depends_on:
+      consultant-db:
+        condition: service_healthy
+
+  # ==========================================
+  # 3. ENTRY SERVICE & DB
+  # ==========================================
+  entry-db:
+    image: postgres:15
+    container_name: entry-db-container
+    environment:
+      POSTGRES_DB: entry_db
+      POSTGRES_USER: entry_user
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U entry_user -d entry_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  entry-service:
+    build: ./services/entry-service
+    container_name: entry-service-app
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_HOST=entry-db
+      - DB_USER=entry_user
+      - DB_PASSWORD=postgres
+    depends_on:
+      entry-db:
+        condition: service_healthy
+
+  # ==========================================
+  # 4. PROJECT SERVICE & DB
+  # ==========================================
+  project-db:
+    image: postgres:15
+    container_name: project-db-container
+    environment:
+      POSTGRES_DB: project_db
+      POSTGRES_USER: project_user
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U project_user -d project_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  project-service:
+    build: ./services/project-service
+    container_name: project-service-app
+    ports:
+      - "8084:8084"
+    environment:
+      - DB_HOST=project-db
+      - DB_USER=project_user
+      - DB_PASSWORD=postgres
+    depends_on:
+      project-db:
+        condition: service_healthy
+
+  # ==========================================
+  # 5. API GATEWAY
+  # ==========================================
+  gateway-service:
+    build: ./Gateway
+    container_name: gateway-service-app 
+    ports:
+      - "8080:8080"   # Seul port d'entrée nécessaire pour le frontend !
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker 
+    depends_on:
+      - customer-service
+      - consultant-service
+      - entry-service
+      - project-service

@@ -1,0 +1,226 @@
+openapi: 3.0.3
+info:
+  title: SERP 24 - Project Service API
+  description: Microservice gérant les projets et leurs affectations (Staffing).
+  version: 1.0.0
+
+servers:
+  # Harmonisé avec Customer : ajout de /api/v1 et port 8082
+  - url: http://localhost:8082/api/v1
+
+tags:
+  - name: Projects
+    description: Projects API
+
+paths:
+  /projects:
+    get:
+      tags:
+        - Projects
+      summary: Get all projects
+      operationId: getProjects
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDTOs'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Projects
+      summary: Create a project
+      operationId: createProject
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectDTO"
+        required: true
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDTO"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{id}:
+    get:
+      tags:
+        - Projects
+      summary: Get a project
+      # Harmonisé : getProjectById au lieu de getProject
+      operationId: getProjectById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the project to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Project retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDTO'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Projects
+      summary: Update a project
+      operationId: updateProject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the project to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectDTO"
+        required: true
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDTO"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Projects
+      summary: Delete a project
+      operationId: deleteProject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the project to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Project deleted
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/consultant/{id}:
+    get:
+      tags:
+        - Projects
+      summary: Get projects by consultant ID
+      operationId: getProjectsByConsultant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the consultant to retrieve projects for
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Projects retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDTOs'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    ProjectDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        status:
+          type: string
+        customer:
+          $ref: '#/components/schemas/ProjectCustomerDTO'
+        projectStaff:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectConsultantDTO'
+
+    ProjectDTOs:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProjectDTO'
+
+    ProjectConsultantDTO:
+      type: object
+      properties:
+        consultantId:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    ProjectCustomerDTO:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

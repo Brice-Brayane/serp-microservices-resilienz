@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: Core API Specification for the Services ERP 24 Project
+  description: |
+    A simple core API specification of customers, 
+    projects and consultants working on the projects.
+  version:
+    1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: Customers
+    description: Customers API
+  - name: Organization
+    description: Internal org structure
+  - name: Projects
+    description: Projects API
+  - name: Time
+    description: Time bookings (entries) for a project and consultant
+paths:
+  /customers:
+    get:
+      tags:
+        - Customers
+      summary: Get all customers
+      operationId: getCustomers
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerDTOs'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Customers
+      summary: Create a Customer
+      operationId: createCustomer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerDTO"
+        required: true
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerDTO"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /customers/{id}:
+    get:
+      tags:
+        - Customers
+      summary: Get a Customer
+      operationId: getCustomerById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the customer to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Customer retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerDTO'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Customers
+      summary: Update a customer
+      operationId: updateCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the customer to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerDTO"
+        required: true
+      responses:
+        '200':
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerDTO"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Customers
+      summary: Delete a customer
+      operationId: deleteCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the customer to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Customer deleted
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+components:
+  schemas:
+    CustomerDTO:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        city:
+          type: string
+    CustomerDTOs:
+      type: array
+      items:
+        $ref: '#/components/schemas/CustomerDTO'
+    
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+
+

@@ -1,0 +1,132 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+
+  # Configuration de la Sécurité OAuth2 avec Azure
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # URL pour récupérer les clés publiques d'Azure (Mandant-ID / Tenant-ID)
+          jwk-set-uri: https://login.microsoftonline.com/90866267-22b3-468c-a24d-0686aa19596f/discovery/v2.0/keys
+          # URL de l'émetteur pour valider l'origine du jeton
+          issuer-uri: https://login.microsoftonline.com/90866267-22b3-468c-a24d-0686aa19596f/v2.0
+
+ 
+            
+      # =========================================================================
+      # CONFIGURATION DES ROUTES (ROUTING)
+      # Le Gateway intercepte les requêtes et les redirige vers les microservices.
+      # =========================================================================
+
+  cloud:
+    gateway:
+      routes:
+
+        # --- 1. CUSTOMER SERVICE ---
+        # Cette route permet au Gateway de récupérer le fichier JSON de doc du service
+        - id: customer-service-docs
+          uri: http://customer-service:8081
+          predicates:
+            - Path=/api/customers/v3/api-docs/**
+          filters:
+            # On transforme "/api/customers/v3/api-docs" en "/v3/api-docs" avant l'envoi
+            - RewritePath=/api/customers/v3/api-docs, /v3/api-docs
+            
+        # Cette route gère les appels métier (ex: GET /api/customers/1)
+        - id: customer-service-route
+          uri: http://customer-service:8081
+          predicates:
+            - Path=/api/customers/**
+          filters:
+            # On retire le préfixe "/api" pour correspondre au contrôleur interne du service
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+            
+
+
+        # --- 2. CONSULTANT SERVICE ---
+        - id: consultant-service-docs
+          uri: http://consultant-service:8082
+          predicates:
+            - Path=/api/consultants/v3/api-docs/**
+          filters:
+            - RewritePath=/api/consultants/v3/api-docs, /v3/api-docs
+        - id: consultant-service-route
+          uri: http://consultant-service:8082
+          predicates:
+            - Path=/api/consultants/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+            
+
+
+        # --- 3. ENTRY SERVICE ---
+        - id: entry-service-docs
+          uri: http://entry-service:8083
+          predicates:
+            - Path=/api/time/v3/api-docs/**
+          filters:
+            - RewritePath=/api/entries/v3/api-docs, /v3/api-docs
+        - id: entry-service-route
+          uri: http://entry-service:8083
+          predicates:
+            - Path=/api/time/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+            
+
+
+        # --- 4. PROJECT SERVICE ---
+        - id: project-service-docs
+          uri: http://project-service:8084
+          predicates:
+            - Path=/api/projects/v3/api-docs/**
+          filters:
+            - RewritePath=/api/projects/v3/api-docs, /v3/api-docs
+        - id: project-service-route
+          uri: http://project-service:8084
+          predicates:
+            - Path=/api/projects/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+            
+
+# =============================================================================
+# AGGRÉGATION SWAGGER (OPENAPI)
+# Permet de regrouper toutes les documentations sur une seule interface Gateway.
+# =============================================================================
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    # Définit les options du menu déroulant "Select a definition"
+    # Chaque 'url' ici doit correspondre à une route '-docs' définie plus haut.
+    urls:
+      - name: Customer Service
+        url: /api/customers/v3/api-docs
+      - name: Consultant Service
+        url: /api/consultants/v3/api-docs
+      - name: Entry Service
+        url: /api/entries/v3/api-docs
+      - name: Project Service
+        url: /api/projects/v3/api-docs
+
+# =============================================================================
+# LOGS & MONITORING
+# =============================================================================
+logging:
+  level:
+    org.springframework.security: DEBUG # Pour voir les erreurs de Login Azure
+    org.springframework.cloud.gateway: DEBUG # Pour voir le passage des jetons
+    org.springframework.web: DEBUG
+    
+
+# Exposition de l'actuator pour surveiller l'état des routes du Gateway
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway

@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: SERP 24 - Entry Service API (Time Management)
+  description: Microservice pour la gestion des saisies de temps (Time entries) sur les projets.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: Time
+    description: Time bookings (entries) for a project and consultant
+
+paths:
+  /time/entries:
+    get:
+      tags:
+        - Time
+      summary: Gets all entries, time bookings
+      operationId: getAllEntries
+      responses:
+        '200':
+          description: Entries retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntryDTO'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /time/entries/{consultantId}:
+    get:
+      tags:
+        - Time
+      summary: Gets all entries, time bookings for a consultant
+      operationId: getEntriesByConsultantId
+      parameters:
+        - name: consultantId
+          in: path
+          required: true
+          description: The ID of the consultant
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Entries retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntryDTO'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Time
+      summary: post an entry, time bookings for a consultant
+      operationId: createEntry
+      parameters:
+        - name: consultantId
+          in: path
+          required: true
+          description: The ID of the consultant
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntryDTO"
+        required: true
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryDTO"
+
+  /time/entries/{consultantId}/{entryId}:
+    put:
+      tags:
+        - Time
+      summary: update an entry, time bookings for a consultant
+      operationId: updateEntry
+      parameters:
+        - name: consultantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: entryId
+          in: path
+          required: true
+          description: The ID of the entry
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntryDTO"
+        required: true
+      responses:
+        '201':
+          description: time updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryDTO"
+
+  /time/projects:
+    get:
+      tags:
+        - Time
+      summary: Gets all projects
+      operationId: getAllProjects
+      responses:
+        '200':
+          description: Projects retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntryProjectDTO'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /time/consultants:
+    get:
+      tags:
+        - Time
+      summary: Gets all consultants
+      operationId: getAllEntryConsultants
+      responses:
+        '200':
+          description: Consultants retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntryConsultantDTO'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    EntryDTO:
+      type: object
+      description: time booking entry
+      properties:
+        entryId:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        hours:
+          type: integer
+        project:
+          $ref: '#/components/schemas/EntryProjectDTO'
+        consultant:
+          $ref: '#/components/schemas/EntryConsultantDTO'
+
+    EntryProjectDTO:
+      type: object
+      properties:
+        projectId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        projectStaff:
+          description: consultant IDs booked on this project
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryConsultantDTO'
+
+    EntryConsultantDTO:
+      type: object
+      properties:
+        consultantId:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

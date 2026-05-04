@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  title: Consultant Service API - SERP 24
+  description: API pour la gestion des consultants et de la structure organisationnelle.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081/api/v1
+tags:
+  - name: Organization
+    description: Internal org structure (Consultants & Users)
+
+paths:
+  /consultants:
+    get:
+      tags:
+        - Organization
+      summary: Gets all consultants in the organization
+      operationId: getConsultants
+      parameters:
+        - in: query
+          name: shallow
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultantDTOs'
+        default: &defaultError
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Organization
+      summary: Creates a consultant in the organization
+      operationId: createConsultant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsultantDTO"
+        required: true
+      responses:
+        '201':
+          description: Consultant created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsultantDTO"
+        default:
+          $ref: '#/components/responses/DefaultError'
+
+  /consultants/{id}:
+    get:
+      tags:
+        - Organization
+      summary: Gets a consultant by ID
+      operationId: getConsultant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Consultant retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultantDTO'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    put:
+      tags:
+        - Organization
+      summary: Update a consultant by ID
+      operationId: updateConsultant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsultantDTO"
+        required: true
+      responses:
+        '200':
+          description: Consultant updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsultantDTO"
+        default:
+          $ref: '#/components/responses/DefaultError'
+    delete:
+      tags:
+        - Organization
+      summary: Remove a consultant by ID
+      operationId: deleteConsultant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Consultant deleted
+        default:
+          $ref: '#/components/responses/DefaultError'
+
+  /users:
+    get:
+      tags:
+        - Organization
+      summary: Gets all users in the organization
+      operationId: getUsers
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTOs'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    post:
+      tags:
+        - Organization
+      summary: Creates a user in the organization
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDTO"
+        required: true
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        default:
+          $ref: '#/components/responses/DefaultError'
+
+  /users/{id}:
+    get:
+      tags:
+        - Organization
+      summary: Gets a user by ID
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    put:
+      tags:
+        - Organization
+      summary: Update a user by ID
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDTO"
+        required: true
+      responses:
+        '200':
+          description: User updated
+        default:
+          $ref: '#/components/responses/DefaultError'
+    delete:
+      tags:
+        - Organization
+      summary: Remove a user by ID
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User deleted
+        default:
+          $ref: '#/components/responses/DefaultError'
+
+components:
+  responses:
+    DefaultError:
+      description: Unexpected Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        consultantID:
+          type: integer
+          format: int64
+        externalID:
+          type: string
+    UserDTOs:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserDTO'
+    ConsultantDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        bookedProjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultantProjectDTO'
+    ConsultantProjectDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        projectID:
+          type: integer
+          format: int64
+        name:
+          type: string
+    ConsultantDTOs:
+      type: array
+      items:
+        $ref: '#/components/schemas/ConsultantDTO'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

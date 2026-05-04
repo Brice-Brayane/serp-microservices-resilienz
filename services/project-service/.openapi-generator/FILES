@@ -1,0 +1,8 @@
+README.md
+pom.xml
+src/main/java/de/ostfalia/serp/project/api/ApiUtil.java
+src/main/java/de/ostfalia/serp/project/api/ProjectsApi.java
+src/main/java/de/ostfalia/serp/project/dto/Error.java
+src/main/java/de/ostfalia/serp/project/dto/ProjectConsultantDTO.java
+src/main/java/de/ostfalia/serp/project/dto/ProjectCustomerDTO.java
+src/main/java/de/ostfalia/serp/project/dto/ProjectDTO.java
